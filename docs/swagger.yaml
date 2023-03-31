@@ -1,0 +1,351 @@
+basePath: /
+definitions:
+  json.ResponseError:
+    properties:
+      error:
+        description: response error message
+        type: string
+      message:
+        description: respone message
+        type: string
+      status:
+        description: status code
+        type: integer
+    type: object
+  json.ResponseHealth:
+    properties:
+      health:
+        type: string
+    type: object
+  json.ResponseSuccess:
+    properties:
+      data:
+        description: response data
+      message:
+        description: respone message
+        type: string
+      status:
+        description: status code
+        type: integer
+    type: object
+  models.Feedback:
+    properties:
+      created_at:
+        type: string
+      date:
+        type: string
+      feedback:
+        type: string
+      id:
+        type: integer
+      type:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.FeedbackInput:
+    properties:
+      feedback:
+        type: string
+      type:
+        type: string
+    required:
+    - feedback
+    - type
+    type: object
+  models.FeedbackListResponse:
+    properties:
+      content:
+        items:
+          $ref: '#/definitions/models.Feedback'
+        type: array
+      count:
+        type: integer
+    type: object
+  models.SignInInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.SignUpInput:
+    properties:
+      confirm_password:
+        minLength: 8
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - confirm_password
+    - email
+    - first_name
+    - last_name
+    - password
+    type: object
+  models.Token:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: limitless-tor-38427.herokuapp.com
+info:
+  contact: {}
+  description: This is a swagger docs for feedback-app-echo assignment.
+  termsOfService: http://swagger.io/terms/
+  title: feedback-app-echo API
+  version: "1.0"
+paths:
+  /feedback:
+    post:
+      consumes:
+      - application/json
+      description: post feedback
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FeedbackInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/json.ResponseSuccess'
+            - properties:
+                id:
+                  type: integer
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: POST API which creates feedback
+  /feedbacks:
+    get:
+      consumes:
+      - application/json
+      description: get feedbacks
+      parameters:
+      - description: string valid
+        in: query
+        name: type
+        type: string
+      - description: int valid
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/json.ResponseSuccess'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.FeedbackListResponse'
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: GET API which returs users feedbacks
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: GET API which returs server health
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/json.ResponseHealth'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+      summary: Show server health
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: POST API which logs in user
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SignInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/json.ResponseSuccess'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Token'
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+      summary: Sign In
+  /refreshtoken:
+    get:
+      consumes:
+      - application/json
+      description: GET API which refresh jwt token
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/json.ResponseSuccess'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Token'
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+      summary: Refresh token
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: POST API which creates user
+      parameters:
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SignUpInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/json.ResponseSuccess'
+            - properties:
+                id:
+                  type: number
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+      summary: User signup
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: GET API which returs current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/json.ResponseSuccess'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.UserResponse'
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/json.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Show current user
+schemes:
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
